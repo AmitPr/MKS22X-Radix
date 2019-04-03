@@ -1,7 +1,13 @@
-public class MyLinkedList<E> {
+import java.util.Iterator;
+
+public class MyLinkedList<E> implements Iterable<E> {
     private int size = 0;
     private Node first;
     private Node last;
+
+    public Iterator<E> iterator() {
+        return new MyIterator(this);
+    }
 
     public MyLinkedList() {
         first = last = null;
@@ -61,7 +67,7 @@ public class MyLinkedList<E> {
             first = first.next;
         } else {
             first = null;
-            last=null;
+            last = null;
         }
         size--;
         return data;
@@ -74,14 +80,16 @@ public class MyLinkedList<E> {
     public Node getLastNode() {
         return last;
     }
-    public E getFirst(){
-        if(first!=null){
+
+    public E getFirst() {
+        if (first != null) {
             return first.data;
         }
         return null;
     }
-    public E getLast(){
-        if(last!=null){
+
+    public E getLast() {
+        if (last != null) {
             return last.data;
         }
         return null;
@@ -142,6 +150,27 @@ public class MyLinkedList<E> {
 
         public void setPrevious(Node previous) {
             this.previous = previous;
+        }
+    }
+
+    private class MyIterator implements Iterator<E> {
+        Node current = null;
+
+        public MyIterator(MyLinkedList<E> list) {
+            current = list.first;
+        }
+
+        public boolean hasNext() {
+            if (current != null) {
+                return true;
+            }
+            return false;
+        }
+
+        public E next() {
+            E n = current.data;
+            current = current.next;
+            return n;
         }
     }
 }
