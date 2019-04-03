@@ -1,9 +1,8 @@
 import java.util.Arrays;
-import java.util.Random;
 import java.util.Iterator;
 
 public class Radix {
-    public static final int TRIALS = 100;
+    public static final int TRIALS = 5;
     public static void main(String[] args) {
         System.out.println("Size\t\tMax Value\tquick/builtin ratio ");
         int[] MAX_LIST = { 10, 500, 1000000000};
@@ -40,7 +39,7 @@ public class Radix {
 
     }
 
-    public static void radixsort(int[] data) {
+    public static void radixsort10(int[] data) {
         @SuppressWarnings("unchecked")
         MyLinkedList<Integer>[] buckets = (MyLinkedList<Integer>[]) new MyLinkedList[10];
         for (int i = 0; i < buckets.length; i++) {
@@ -77,6 +76,50 @@ public class Radix {
             curWork.clear();
             merge(curWork, buckets);
             curDigit++;
+        }
+        for (int i = 0; i < data.length; i++) {
+            data[i] = curWork.removeFirst();
+        }
+    }
+
+    public static void radixsort(int[] data) {
+        @SuppressWarnings("unchecked")
+        MyLinkedList<Integer>[] buckets = (MyLinkedList<Integer>[]) new MyLinkedList[16];
+        for (int i = 0; i < buckets.length; i++) {
+            buckets[i] = new MyLinkedList<Integer>();
+        }
+        int largest = Integer.MIN_VALUE;
+        int smallest = Integer.MAX_VALUE;
+        int curDigit = 0;
+        for (int i = 0; i < data.length; i++) {
+            int digit = data[i]&0xf;
+            if (data[i] > largest)
+                largest = data[i];
+            if (data[i] < smallest)
+                smallest = data[i];
+            if (data[i] < 0)
+                buckets[digit].addFirst(data[i]);
+            else
+                buckets[digit].addLast(data[i]);
+        }
+        if (Math.abs(smallest) > largest)
+            largest = Math.abs(smallest);
+        MyLinkedList<Integer> curWork = new MyLinkedList<Integer>();
+        merge(curWork, buckets);
+        curDigit+=4;
+        while ((largest = (largest >>4)) > 0) {
+            Iterator<Integer> it = curWork.iterator();
+            while (it.hasNext()) {
+                int x = it.next();
+                int digit = (x>>curDigit)&0xf;
+                if (x < 0)
+                    buckets[digit].addFirst(x);
+                else
+                    buckets[digit].addLast(x);
+            }
+            curWork.clear();
+            merge(curWork, buckets);
+            curDigit+=4;
         }
         for (int i = 0; i < data.length; i++) {
             data[i] = curWork.removeFirst();
