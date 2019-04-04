@@ -84,7 +84,7 @@ public class Radix {
 
     public static void radixsort(int[] data) {
         @SuppressWarnings("unchecked")
-        MyLinkedList<Integer>[] buckets = (MyLinkedList<Integer>[]) new MyLinkedList[16];
+        MyLinkedList<Integer>[] buckets = (MyLinkedList<Integer>[]) new MyLinkedList[32];
         for (int i = 0; i < buckets.length; i++) {
             buckets[i] = new MyLinkedList<Integer>();
         }
@@ -98,7 +98,7 @@ public class Radix {
             if (data[i] < smallest)
                 smallest = data[i];
             if (data[i] < 0)
-                buckets[digit].addFirst(data[i]);
+                buckets[16-digit].addFirst(data[i]);
             else
                 buckets[digit].addLast(data[i]);
         }
@@ -113,7 +113,7 @@ public class Radix {
                 int x = it.next();
                 int digit = (x>>curDigit)&0xf;
                 if (x < 0)
-                    buckets[digit].addFirst(x);
+                    buckets[16-digit].addFirst(x);
                 else
                     buckets[digit].addLast(x);
             }
@@ -127,17 +127,8 @@ public class Radix {
     }
 
     private static void merge(MyLinkedList<Integer> into, MyLinkedList<Integer>[] buckets) {
-        into.extend(buckets[0]);
-        for (int i = 1; i < buckets.length; i++) {
-            Iterator<Integer> it = buckets[i].iterator();
-            while (it.hasNext()) {
-                int x = it.next();
-                if (x < 0)
-                    into.addFirst(x);
-                else
-                    into.addLast(x);
-            }
-            buckets[i].clear();
+        for (int i = 0; i < buckets.length; i++) {
+            into.extend(buckets[i]);
         }
     }
 
