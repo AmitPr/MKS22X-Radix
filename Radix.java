@@ -15,7 +15,7 @@ public class Radix {
                     int[] data1 = new int[size];
                     int[] data2 = new int[size];
                     for (int i = 0; i < data1.length; i++) {
-                        data1[i] = (int) (Math.random() * MAX);
+                        data1[i] = (int) (Math.random() * MAX - MAX/2);
                         data2[i] = data1[i];
                     }
                     long t1, t2;
@@ -39,7 +39,7 @@ public class Radix {
 
     }
 
-    public static void radixsort10(int[] data) {
+    public static void radixsort(int[] data) {
         @SuppressWarnings("unchecked")
         MyLinkedList<Integer>[] buckets = (MyLinkedList<Integer>[]) new MyLinkedList[10];
         for (int i = 0; i < buckets.length; i++) {
@@ -82,53 +82,18 @@ public class Radix {
         }
     }
 
-    public static void radixsort(int[] data) {
-        @SuppressWarnings("unchecked")
-        MyLinkedList<Integer>[] buckets = (MyLinkedList<Integer>[]) new MyLinkedList[32];
-        for (int i = 0; i < buckets.length; i++) {
-            buckets[i] = new MyLinkedList<Integer>();
-        }
-        int largest = Integer.MIN_VALUE;
-        int smallest = Integer.MAX_VALUE;
-        int curDigit = 0;
-        for (int i = 0; i < data.length; i++) {
-            int digit = data[i]&0xf;
-            if (data[i] > largest)
-                largest = data[i];
-            if (data[i] < smallest)
-                smallest = data[i];
-            if (data[i] < 0)
-                buckets[16-digit].addFirst(data[i]);
-            else
-                buckets[digit].addLast(data[i]);
-        }
-        if (Math.abs(smallest) > largest)
-            largest = Math.abs(smallest);
-        MyLinkedList<Integer> curWork = new MyLinkedList<Integer>();
-        merge(curWork, buckets);
-        curDigit+=4;
-        while ((largest = (largest >>4)) > 0) {
-            Iterator<Integer> it = curWork.iterator();
+    private static void merge(MyLinkedList<Integer> into, MyLinkedList<Integer>[] buckets) {
+        into.extend(buckets[0]);
+        for (int i = 1; i < buckets.length; i++) {
+            Iterator<Integer> it = buckets[i].iterator();
             while (it.hasNext()) {
                 int x = it.next();
-                int digit = (x>>curDigit)&0xf;
                 if (x < 0)
-                    buckets[16-digit].addFirst(x);
+                    into.addFirst(x);
                 else
-                    buckets[digit].addLast(x);
+                    into.addLast(x);
             }
-            curWork.clear();
-            merge(curWork, buckets);
-            curDigit+=4;
-        }
-        for (int i = 0; i < data.length; i++) {
-            data[i] = curWork.removeFirst();
-        }
-    }
-
-    private static void merge(MyLinkedList<Integer> into, MyLinkedList<Integer>[] buckets) {
-        for (int i = 0; i < buckets.length; i++) {
-            into.extend(buckets[i]);
+            buckets[i].clear();
         }
     }
 
