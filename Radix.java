@@ -6,9 +6,9 @@ public class Radix {
 
     public static void main(String[] args) {
         System.out.println("Size\t\tMax Value\tquick/builtin ratio ");
-        int[] MAX_LIST = {10,500, 1000000000 };
+        int[] MAX_LIST = { 10, 500, 1000000000 };
         for (int MAX : MAX_LIST) {
-            for (int size = 32150; size < 2000001; size *= 2) {
+            for (int size = 31250; size < 2000001; size *= 2) {
                 long qtime = 0;
                 long btime = 0;
                 // average of 5 sorts.
@@ -42,6 +42,58 @@ public class Radix {
 
     public static void radixsort(int[] data) {
         @SuppressWarnings("unchecked")
+        MyLinkedList<Integer>[] buckets = (MyLinkedList<Integer>[]) new MyLinkedList[32];
+        for (int i = 0; i < buckets.length; i++) {
+            buckets[i] = new MyLinkedList<Integer>();
+        }
+        int largest = Integer.MIN_VALUE;
+        int smallest = Integer.MAX_VALUE;
+        int curDigit = 0;
+        for (int i = 0; i < data.length; i++) {
+            int digit = 0;
+            if (data[i] > 0)
+                digit = data[i] & 0xf;
+            else
+                digit = (data[i] * -1) & 0xf;
+            if (data[i] > largest)
+                largest = data[i];
+            if (data[i] < smallest)
+                smallest = data[i];
+            if (data[i] < 0)
+                buckets[15 - digit].addLast(data[i]);
+            else
+                buckets[16 + digit].addLast(data[i]);
+        }
+        if (Math.abs(smallest) > largest)
+            largest = Math.abs(smallest);
+        MyLinkedList<Integer> curWork = new MyLinkedList<Integer>();
+        merge(curWork, buckets);
+        curDigit += 4;
+        while ((largest = (largest >> 4)) > 0) {
+            Iterator<Integer> it = curWork.iterator();
+            while (it.hasNext()) {
+                int x = it.next();
+                int digit = 0;
+                if (x> 0)
+                    digit = (x>>curDigit) & 0xf;
+                else
+                    digit = ((x * -1)>>curDigit) & 0xf;
+                if (x < 0)
+                    buckets[15 - digit].addLast(x);
+                else
+                    buckets[16 + digit].addLast(x);
+            }
+            curWork.clear();
+            merge(curWork, buckets);
+            curDigit += 4;
+        }
+        for (int i = 0; i < data.length; i++) {
+            data[i] = curWork.removeFirst();
+        }
+    }
+
+    public static void radixsort10(int[] data) {
+        @SuppressWarnings("unchecked")
         MyLinkedList<Integer>[] buckets = (MyLinkedList<Integer>[]) new MyLinkedList[20];
         for (int i = 0; i < buckets.length; i++) {
             buckets[i] = new MyLinkedList<Integer>();
@@ -55,9 +107,9 @@ public class Radix {
             if (data[i] < smallest)
                 smallest = data[i];
             if (data[i] < 0)
-                buckets[9-digitAt(data[i], curDigit)].addLast(data[i]);
+                buckets[9 - digitAt(data[i], curDigit)].addLast(data[i]);
             else
-                buckets[10+digitAt(data[i], curDigit)].addLast(data[i]);
+                buckets[10 + digitAt(data[i], curDigit)].addLast(data[i]);
         }
         if (Math.abs(smallest) > largest)
             largest = Math.abs(smallest);
@@ -70,9 +122,9 @@ public class Radix {
             while (it.hasNext()) {
                 int x = it.next();
                 if (x < 0)
-                    buckets[9-digitAt(x, curDigit)].addLast(x);
+                    buckets[9 - digitAt(x, curDigit)].addLast(x);
                 else
-                    buckets[10+digitAt(x, curDigit)].addLast(x);
+                    buckets[10 + digitAt(x, curDigit)].addLast(x);
             }
             curWork.clear();
             merge(curWork, buckets);
@@ -85,6 +137,7 @@ public class Radix {
 
     private static void merge(MyLinkedList<Integer> into, MyLinkedList<Integer>[] buckets) {
         for (int i = 0; i < buckets.length; i++) {
+            //System.out.println("i: "+ buckets[i].toString());
             into.extend(buckets[i]);
         }
     }
