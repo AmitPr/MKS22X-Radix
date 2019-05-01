@@ -3,11 +3,12 @@ import java.util.Iterator;
 
 public class Radix {
     public static final int TRIALS = 5;
+
     public static void main(String[] args) {
         System.out.println("Size\t\tMax Value\tquick/builtin ratio ");
-        int[] MAX_LIST = { 10, 500, 1000000000};
+        int[] MAX_LIST = {10,500, 1000000000 };
         for (int MAX : MAX_LIST) {
-            for (int size = 31250; size < 2000001; size *= 2) {
+            for (int size = 32150; size < 2000001; size *= 2) {
                 long qtime = 0;
                 long btime = 0;
                 // average of 5 sorts.
@@ -15,7 +16,7 @@ public class Radix {
                     int[] data1 = new int[size];
                     int[] data2 = new int[size];
                     for (int i = 0; i < data1.length; i++) {
-                        data1[i] = (int) (Math.random() * MAX - MAX/2);
+                        data1[i] = (int) (Math.random() * MAX - MAX / 2);
                         data2[i] = data1[i];
                     }
                     long t1, t2;
@@ -41,7 +42,7 @@ public class Radix {
 
     public static void radixsort(int[] data) {
         @SuppressWarnings("unchecked")
-        MyLinkedList<Integer>[] buckets = (MyLinkedList<Integer>[]) new MyLinkedList[10];
+        MyLinkedList<Integer>[] buckets = (MyLinkedList<Integer>[]) new MyLinkedList[20];
         for (int i = 0; i < buckets.length; i++) {
             buckets[i] = new MyLinkedList<Integer>();
         }
@@ -54,9 +55,9 @@ public class Radix {
             if (data[i] < smallest)
                 smallest = data[i];
             if (data[i] < 0)
-                buckets[digitAt(data[i], curDigit)].addFirst(data[i]);
+                buckets[9-digitAt(data[i], curDigit)].addLast(data[i]);
             else
-                buckets[digitAt(data[i], curDigit)].addLast(data[i]);
+                buckets[10+digitAt(data[i], curDigit)].addLast(data[i]);
         }
         if (Math.abs(smallest) > largest)
             largest = Math.abs(smallest);
@@ -69,9 +70,9 @@ public class Radix {
             while (it.hasNext()) {
                 int x = it.next();
                 if (x < 0)
-                    buckets[digitAt(x, curDigit)].addFirst(x);
+                    buckets[9-digitAt(x, curDigit)].addLast(x);
                 else
-                    buckets[digitAt(x, curDigit)].addLast(x);
+                    buckets[10+digitAt(x, curDigit)].addLast(x);
             }
             curWork.clear();
             merge(curWork, buckets);
@@ -83,22 +84,13 @@ public class Radix {
     }
 
     private static void merge(MyLinkedList<Integer> into, MyLinkedList<Integer>[] buckets) {
-        into.extend(buckets[0]);
-        for (int i = 1; i < buckets.length; i++) {
-            Iterator<Integer> it = buckets[i].iterator();
-            while (it.hasNext()) {
-                int x = it.next();
-                if (x < 0)
-                    into.addFirst(x);
-                else
-                    into.addLast(x);
-            }
-            buckets[i].clear();
+        for (int i = 0; i < buckets.length; i++) {
+            into.extend(buckets[i]);
         }
     }
 
     private static int digitAt(int n, int digit) {
-        int d = (n / ((int) Math.pow(10, digit - 1))) % 10;
-        return Math.abs(d);
+        int d = (Math.abs(n) / ((int) Math.pow(10, digit - 1))) % 10;
+        return d;
     }
 }
